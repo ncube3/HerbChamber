@@ -7,13 +7,13 @@
  */
 
 // constants won't change
-const int fan = 2;  // the Arduino pin, which connects to the IN pin of relay
-const int s1 = 3;  // the Arduino pin, which connects to the IN pin of relay
-const int s2 = 4;  // the Arduino pin, which connects to the IN pin of relay
-const int s3 = 5;  // the Arduino pin, which connects to the IN pin of relay
-const int s4 = 6;  // the Arduino pin, which connects to the IN pin of relay
-const int s5 = 7;  // the Arduino pin, which connects to the IN pin of relay
-const int pump = 8;  // the Arduino pin, which connects to the IN pin of relay
+const int fan = 4;  // the Arduino pin, which connects to the IN pin of relay
+const int s1 = 5;  // the Arduino pin, which connects to the IN pin of relay
+const int s2 = 6;  // the Arduino pin, which connects to the IN pin of relay
+const int s3 = 7;  // the Arduino pin, which connects to the IN pin of relay
+const int s4 = 8;  // the Arduino pin, which connects to the IN pin of relay
+const int s5 = 9;  // the Arduino pin, which connects to the IN pin of relay
+const int pump = 10;  // the Arduino pin, which connects to the IN pin of relay
 
 // the setup function runs once when you press reset or power the board
 void setup() {
