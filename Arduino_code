@@ -14,6 +14,8 @@ const int s3 = 7;  // the Arduino pin, which connects to the IN pin of relay
 const int s4 = 8;  // the Arduino pin, which connects to the IN pin of relay
 const int s5 = 9;  // the Arduino pin, which connects to the IN pin of relay
 const int pump = 10;  // the Arduino pin, which connects to the IN pin of relay
+const int light = 11;
+const int ht_sensor = 12;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -29,6 +31,7 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
+
   digitalWrite(fan, HIGH);
   digitalWrite(s1, HIGH);
   digitalWrite(s2, HIGH);
