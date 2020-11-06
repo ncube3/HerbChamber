@@ -8,7 +8,7 @@
 #define WIFI_SSID "Galaxy10"                                  
 #define WIFI_PASSWORD "00000000"            
  
-#define DHTPIN D2                                            // Digital pin connected to DHT11
+#define DHTPIN D4                                            // Digital pin connected to DHT11
 #define DHTTYPE DHT11                                        // Initialize dht type as DHT 11
 DHT(DHTPIN, DHTTYPE);                                                    
  
