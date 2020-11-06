@@ -4,7 +4,7 @@
 #include <DHT.h> //install DHT Library and Adafruit Unified Sensor Library
 
 
-#define FIREBASE_HOST "sdp21-4b787.firebaseio.com.firebaseio.com" //Without http:// or https:// schemes
+#define FIREBASE_HOST "sdp21-4b787.firebaseio.com" //Without http:// or https:// schemes
 #define FIREBASE_AUTH "Vw8ZlF4gKtPxfs4i0K7EWKMSVJpP6yvZFVWCwR2l"
 #define WIFI_SSID "Galaxy10"                                  
 #define WIFI_PASSWORD "00000000"
