@@ -1,15 +1,27 @@
-//Arduino code
+#include <dht.h>
 #include <SoftwareSerial.h>
-SoftwareSerial s(5, 6);
+SoftwareSerial espSerial(2, 3);
+dht DHT;
+
+#define DHT11_PIN 4
 
 void setup() {
-  s.begin(9600);
+  Serial.begin(9600);
+  espSerial.begin(115200);
 }
 
 void loop() {
-  int data = 50;
-  if (s.available() > 0)
-  {
-    s.write(data);
-  }
+  int chk = DHT.read11(DHT11_PIN);
+  int t_c = (int)DHT.temperature;
+  int t_f = (t_c * 9/5) + 32;
+  int h = (int)DHT.humidity;
+  Serial.print("Humidity: ");
+  Serial.print(h);
+  Serial.print("% ");
+  Serial.print("Temperature: ");
+  Serial.print(t_f);
+  Serial.println("F");
+  String  str = String("coming from arduino: ") + String("H= ") + String(h) + String("T= ") + String(t_f);
+  espSerial.println(str);
+  delay(2000);
 }
