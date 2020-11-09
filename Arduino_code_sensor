@@ -1,5 +1,3 @@
-#include <SoftwareSerial.h>
-SoftwareSerial ArduinoUno(3,2);
 
 // constants won't change
 const int fan = 4;  // the Arduino pin, which connects to the IN pin of relay
@@ -15,7 +13,6 @@ const int ht_sensor = 12;
 // the setup function runs once when you press reset or power the board
 void setup() {
   Serial.begin(9600);
-	ArduinoUno.begin(4800);
   
   pinMode(fan, OUTPUT);
   pinMode(s1, OUTPUT);
@@ -29,10 +26,4 @@ void setup() {
 // the loop function runs over and over again forever
 void loop() {
 
-  //Send i to esp8266
-  int i = 10;
-	NodeMCU.print(i);
-	NodeMCU.println("\n");
-	delay(30);
-  
 }
