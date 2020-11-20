@@ -5,33 +5,29 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <BlynkSimpleEsp8266.h>
-#include "DHTesp.h"
-#pragma message(THIS EXAMPLE IS FOR ESP8266 ONLY!)
-#error Select ESP8266 board.
-#endif
-
-
 
 #define FIREBASE_HOST "sdp21-4b787.firebaseio.com/" //Without http:// or https:// schemes
 #define FIREBASE_AUTH "Vw8ZlF4gKtPxfs4i0K7EWKMSVJpP6yvZFVWCwR2l"
 #define WIFI_SSID "Galaxy10"
 #define WIFI_PASSWORD "00000000"
-#define DHTPIN 2   // Connect Data pin of DHT to D2
+#define DHTPIN 2   // Connect Data pin of DHT to D4
 #define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
+SimpleTimer timer;
 
 #define BLYNK_AUTH "hLSCZBi8YLbREhb96i39ASKzR2-Z1uiE"
-DHTesp dht;
 #define BLYNK_PRINT Serial
 
-DHT dht(DHTPIN, DHTTYPE);
 FirebaseData firebaseData; //Define FirebaseESP8266 data object
 FirebaseJson json;
 
-const int AirValue = 620;   //you need to replace this value with Value_1
+const int AirValue = 640;   //you need to replace this value with Value_1
 const int WaterValue = 360;  //you need to replace this value with Value_2
-const int SensorPin = A0;
+const int sensorPin = A0;
 int soilMoistureValue = 0;
 int soilmoisturepercent = 0;
+int sensorvalue = 0;
+int outputvalue = 0;
 
 void setup() {
 
@@ -39,6 +35,7 @@ void setup() {
 
   dht.begin();
 
+  Blynk.begin(BLYNK_AUTH, WIFI_SSID, WIFI_PASSWORD);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED)
@@ -53,8 +50,8 @@ void setup() {
 
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
   Firebase.reconnectWiFi(true);
-
-  Blynk.begin(BLYNK_AUTH, WIFI_SSID, WIFI_PASSWORD);
+  pinMode(sensorPin, INPUT);
+  timer.setInterval(1000L, sensorUpdate);
 }
 
 void sensorUpdate() {
@@ -66,7 +63,6 @@ void sensorUpdate() {
   float f = dht.readTemperature();
   // Read temperature as Celsius (isCelsius = true)
   float t = dht.readTemperature(true);
-
   // Check if any reads failed and exit early (to try again).
   if (isnan(h) || isnan(t) || isnan(f)) {
     Serial.println(F("Failed to read from DHT sensor!"));
@@ -77,15 +73,13 @@ void sensorUpdate() {
   Serial.print(h);
   Serial.print(F("%  Temperature: "));
   Serial.print(t);
-  Serial.print(F("F  ,"));
-  Serial.print(f);
-  Serial.println(F("C  "));
+  Serial.print(F("F  , "));
   Serial.print(F("Moisture: "));
   Serial.print(soilmoisturepercent);
-  Serial.print("% ,");
+  Serial.print("% , ");
   Serial.println(soilMoistureValue);
-
-
+  
+  Blynk.run();
   if (Firebase.setFloat(firebaseData, "/FirebaseIOT/temperature", t))
   {
     Serial.println("PASSED");
@@ -119,9 +113,7 @@ void sensorUpdate() {
     Serial.println("------------------------------------");
     Serial.println();
   }
-
-  soilMoistureValue = analogRead(SensorPin);  //put Sensor insert into soil
-  soilmoisturepercent = map(soilMoistureValue, AirValue, WaterValue, 0, 100);
+  
   if (soilmoisturepercent >= 100)
   {
     Serial.println("100 %");
@@ -149,11 +141,32 @@ void sensorUpdate() {
       Serial.println();
     }
   }
+
+  Blynk.virtualWrite(V1, soilmoisturepercent);
+  Blynk.virtualWrite(V5, h);
+  Blynk.virtualWrite(V6, t);
+
+  soilMoistureValue = analogRead(sensorPin);  //put Sensor insert into soil
+  soilmoisturepercent = map(soilMoistureValue, AirValue, WaterValue, 0, 100); 
+  
+  if(soilmoisturepercent > 35)
+  {
+       Blynk.notify("soil is in optimal conditions, no need to water your plants");
+       delay(600); 
+  }
+  else if(soilmoisturepercent < 30)
+  {
+       Blynk.notify("soil is not wet enought, please water your plant");
+       delay(600);
+  }
+  
 }
 
 void loop() {
   
   sensorUpdate();
+  Blynk.run(); // Initiates Blynk
+  timer.run(); // Initiates SimpleTimer
   delay(2000);
 }
 
