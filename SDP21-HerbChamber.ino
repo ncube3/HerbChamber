@@ -1,22 +1,32 @@
+#include <DHT.h>
+#include <DHT_U.h>
+#include <SoftwareSerial.h>
+#include <ArduinoJson.h>
+
+
 // Relay Control Pins
-const int RLY_PUMP        = 10;
-const int RLY_FANS        = 4;
-const int RLY_NUTRIENTS   = 9;
-const int RLY_LIGHT       = 11;
-const int RLY_VALVE1      = 5;
-const int RLY_VALVE2      = 6;
-const int RLY_VALVE3      = 7;
-const int RLY_VALVE4      = 8;
+const int RLY_FANS        = 5;
+const int RLY_VALVE1      = 9;
+const int RLY_VALVE2      = 10;
+const int RLY_VALVE3      = -1;
+const int RLY_VALVE4      = -1;
+const int RLY_NUTRIENTS   = -1;
+const int RLY_PUMP        = 11;
+const int RLY_LIGHT       = 12;
 
 // Analog Sensor Pins
-const int SENSOR_MOISTURE1 = A1;
-const int SENSOR_MOISTURE2 = A2;
-const int SENSOR_MOISTURE3 = A3;
-const int SENSOR_MOISTURE4 = A4;
+const int SENSOR_MOISTURE1 = A0;
+const int SENSOR_MOISTURE2 = A1;
+const int SENSOR_MOISTURE3 = A2;
+const int SENSOR_MOISTURE4 = A3;
 
-const int SENSOR_TEMPERATURE = A5;
+const int DHT_PIN = 12;
+const int SENSOR_TEMPERATURE = 12;
 const int SENSOR_HUMIDITY = 12;
 
+
+DHT dht(DHT_PIN, DHT11);
+SoftwareSerial serial(5,6);
 
 // Constants
 
@@ -24,14 +34,15 @@ const int waterTime = 28;
 const int nutrientTime = 5;
 
 const int moistureThreshold = 25;
-const int temperatureThreshold = 80;
+const int tempThreshold = 80;
 
-const int inputProcessInterval = 10;
+const int minMoisture = 640;
+const int maxMoisture = 360;
+
+const int inputProcessInterval = 1;
 
 
 void setup() {
-
-  Serial.begin(9600); 
 
   pinMode(RLY_PUMP, OUTPUT);
   pinMode(RLY_FANS, OUTPUT);
@@ -43,16 +54,41 @@ void setup() {
   pinMode(RLY_VALVE4, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
 
-  initialTest();
+  
+  digitalWrite(RLY_PUMP, LOW);
+  digitalWrite(RLY_FANS, LOW);
+  digitalWrite(RLY_NUTRIENTS, LOW);
+  digitalWrite(RLY_LIGHT, LOW);
+  digitalWrite(RLY_VALVE1, LOW);
+  digitalWrite(RLY_VALVE2, LOW);
+  digitalWrite(RLY_VALVE3, LOW);
+  digitalWrite(RLY_VALVE4, LOW);
+
+  statusBlink(3);
+
+  //initialTest();
+
+  //statusBlink(3);
+
+  dht.begin();
+  serial.begin(4800);
 
   digitalWrite(RLY_LIGHT, HIGH);
   
   
 }
 
+void statusBlink(int num){
+  for(int i = 0; i < num; i++){
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(1000);
+    digitalWrite(LED_BUILTIN, LOW);  
+    delay(1000);
+  }
+}
 
 void loop() {
-  //processSensorInputs();
+  processSensorInputs();
   delay(inputProcessInterval*1000);
 }
 
@@ -60,25 +96,24 @@ void loop() {
 
 void processSensorInputs(){
 
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);  
   
   int m1 = analogRead(SENSOR_MOISTURE1);
   int m2 = analogRead(SENSOR_MOISTURE2);
   int m3 = analogRead(SENSOR_MOISTURE3);
   int m4 = analogRead(SENSOR_MOISTURE4);
   
-  int temp = analogRead(SENSOR_TEMPERATURE);
-  int humid = analogRead(SENSOR_HUMIDITY);
+  double temp = dht.readTemperature();
+  double humid = dht.readHumidity();
 
-  Serial.println("MOISTURE1: " + m1);
-  Serial.println("MOISTURE2: " + m1);
-  Serial.println("MOISTURE3: " + m1);
-  Serial.println("MOISTURE4: " + m1);
-  
-  Serial.println("TEMP: " + temp);
-  Serial.println("HUMIDITY: " + humid);
+  if (isnan(temp) || isnan(humid)) {
+    Serial.println("Failed to read from DHT sensor!");
+  }
+
+
+  m1 = map(m1, minMoisture, maxMoisture, 0, 100);
+  m2 = map(m2, minMoisture, maxMoisture, 0, 100);
+  m3 = map(m3, minMoisture, maxMoisture, 0, 100);
+  m4 = map(m4, minMoisture, maxMoisture, 0, 100);
 
   // make decisions based on threshold
 
@@ -98,9 +133,22 @@ void processSensorInputs(){
     runWaterPump(4);
   }
 
-  if(temp < 80){
-    digitalWrite(RLY_FANS, HIGH);
+  if(temp < tempThreshold){
+  //  digitalWrite(RLY_FANS, HIGH);
   }
+
+  else{
+ ///   digitalWrite(RLY_FANS, LOW);
+  }
+
+  
+    statusBlink(1);
+
+   StaticJsonDocument<1000> doc;
+   JsonObject root = doc.to<JsonObject>();
+   root["moisture1"] = 100;
+   root["moisture2"] = 50;
+   serializeJson(doc,serial);
 
 }
 
@@ -161,10 +209,45 @@ void selectValve(int valveNum){
 
 void initialTest(){
 
+  delay(1000);
+  digitalWrite(RLY_FANS, HIGH);
+  delay(5000);
+  digitalWrite(RLY_FANS, LOW);
+  delay(500);
+  
+  digitalWrite(RLY_VALVE1, HIGH);
+  delay(5000);
+  digitalWrite(RLY_VALVE1, LOW);
+  delay(500);
+  
+  digitalWrite(RLY_VALVE2, HIGH);
+  delay(5000);
+  digitalWrite(RLY_VALVE2, LOW);
+  delay(1000);
+  
+  digitalWrite(RLY_PUMP, HIGH);
+  delay(5000);
+  digitalWrite(RLY_PUMP, LOW);
+  delay(1000);
 
-  for(int rly = 5; rly <= 11; rly++){
-    digitalWrite(rly, HIGH);
-    delay(2000);
-    digitalWrite(rly, LOW);
-  }
+  digitalWrite(RLY_LIGHT, HIGH);
+  delay(5000);
+  digitalWrite(RLY_LIGHT, LOW);
+  delay(1000);
+  
+  digitalWrite(RLY_FANS, HIGH);
+  digitalWrite(RLY_PUMP, HIGH);
+  delay(5000);
+  digitalWrite(RLY_FANS, LOW);
+  digitalWrite(RLY_PUMP, LOW);
+  delay(1000);
+
+  digitalWrite(RLY_FANS, HIGH);
+  digitalWrite(RLY_PUMP, HIGH);
+  digitalWrite(RLY_LIGHT, HIGH);
+  delay(5000);
+  digitalWrite(RLY_FANS, LOW);
+  digitalWrite(RLY_PUMP, LOW);
+  digitalWrite(RLY_LIGHT, LOW);
+  delay(1000);
 }
