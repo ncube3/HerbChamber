@@ -1,20 +1,17 @@
+//Arduino code
 #include <SoftwareSerial.h>
-SoftwareSerial ArduinoUno(3,2);
-
-void setup(){
-	
-	Serial.begin(9600);
-	ArduinoUno.begin(4800);
-
+SoftwareSerial s(3,2);
+ 
+void setup() {
+  s.begin(9600);
+  pinMode(LED_BUILTIN, OUTPUT);
 }
+ 
+void loop() {
+  int data=50;
 
-void loop(){
-	
-	while(ArduinoUno.available()>0){
-	float val = ArduinoUno.parseFloat();
-	if(ArduinoUno.read()== '\n'){
-	Serial.println(val);
-	}
-}
-delay(30);
+  digitalWrite(LED_BUILTIN, !digitalRead(13));
+  s.write(data);
+   
+  delay(500);
 }
