@@ -1,13 +1,26 @@
+#include <SoftwareSerial.h>
+SoftwareSerial s(D6,D5);
+#include <ArduinoJson.h>
+ 
 void setup() {
-// Open serial communications and wait for port to open:
-Serial.begin(115200);
-while (!Serial) {
-; // wait for serial port to connect. Needed for native USB port only
-}
-}
+  // Initialize Serial port
+  Serial.begin(9600);
+  s.begin(115200);
+  while (!Serial) continue;
+ }
+ 
+void loop() {
+  const size_t capacity = JSON_OBJECT_SIZE(10) + 20; 
+  DynamicJsonDocument doc(capacity);
+  DeserializationError error = deserializeJson(doc, s);
+  if (error) {
+  return;
+  }
 
-void loop() { // run over and over
-if (Serial.available()) {
-Serial.write(Serial.read());
-}
+
+  Serial.println("JSON received and parsed");
+  serializeJsonPretty(doc,Serial);
+  Serial.println("");
+  Serial.println("---------------------xxxxx--------------------");
+  delay(2000);
 }
