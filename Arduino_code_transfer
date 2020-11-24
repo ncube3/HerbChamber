@@ -1,27 +1,42 @@
-#include <dht.h>
-#include <SoftwareSerial.h>
-SoftwareSerial espSerial(2, 3);
-dht DHT;
+#include <DHT.h>
+#define DHTPIN 4  // Connect Data pin of DHT to D4
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
 
-#define DHT11_PIN 4
+
+#include <SoftwareSerial.h>
+#include <ArduinoJson.h>
+SoftwareSerial s(5, 6);
 
 void setup() {
+  dht.begin();
   Serial.begin(9600);
-  espSerial.begin(115200);
+  s.begin(115200);
 }
 
-void loop() {
-  int chk = DHT.read11(DHT11_PIN);
-  int t_c = (int)DHT.temperature;
-  int t_f = (t_c * 9/5) + 32;
-  int h = (int)DHT.humidity;
-  Serial.print("Humidity: ");
+
+void printSensor() {
+  float h = dht.readHumidity();
+  float f = dht.readTemperature();
+  float t = dht.readTemperature(true);
+  if (isnan(h) || isnan(t) || isnan(f)) {
+  Serial.println(F("Failed to read from DHT sensor!"));
+  return;
+  }
+
+  Serial.print(F("\nHumidity: (%)"));
   Serial.print(h);
-  Serial.print("% ");
-  Serial.print("Temperature: ");
-  Serial.print(t_f);
-  Serial.println("F");
-  String  str = String("coming from arduino: ") + String("H= ") + String(h) + String("T= ") + String(t_f);
-  espSerial.println(str);
+  Serial.print(F("\nTemperature (F): "));
+  Serial.print(t);
+
   delay(2000);
+}
+void loop() {
+
+  StaticJsonDocument<100> doc;
+  doc["Humidity (%)"] = dht.readHumidity();
+  doc["Temperature (F)"] = (int)dht.readTemperature(true);
+  serializeJson(doc, s);
+  delay(1500);
+
 }
