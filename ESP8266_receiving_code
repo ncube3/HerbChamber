@@ -6,7 +6,7 @@
 #include <Wire.h>
 
 #define FIREBASE_HOST "sdp21-4b787.firebaseio.com/" //Without http:// or https:// schemes
-#define FIREBASE_AUTH "Vw8ZlF4gKtPxfs4i0K7EWKMSVJpP6yvZFVWCwR2l"
+#define FIREBASE_AUTH "Vw8ZlF4gKtPxfs4i0K7EWKMSVJpP6yvZFVWCwR2l"  
 #define WIFI_SSID "fried rice"
 #define WIFI_PASSWORD "4133337117"
 
@@ -34,30 +34,23 @@ void setup() {
   Serial.begin(9600);
   s.begin(115200);
   while (!Serial) continue;
-  
+  //testing the connection
+  String data2 = "hello from esp";
+  Firebase.pushString(firebaseData,"/arduino2", data2); 
  }
                               
   
 
 
 void loop() { 
-  String data ;
-  String data2 = "hello from esp";
+  String data;
+
   StaticJsonDocument<256> doc;
   DeserializationError error = deserializeJson(doc, s);
   if (error) {
   return;
   }
   serializeJsonPretty(doc,data); 
-  Serial.println("JSON received and parsed");
-  serializeJsonPretty(doc,Serial);
-  Serial.println("");
-  Serial.println("---------------------xxxxx--------------------\n");
-
-  
-  Serial.println("----------------------------------------------");
   Serial.println(data);
-  Serial.println("----------------------------------------------");
-  Firebase.pushString(firebaseData,"/arduino", data);
-  Firebase.pushString(firebaseData,"/arduino2", data2); 
-}
+  Firebase.setString(firebaseData,"/arduino", data);
+  }
