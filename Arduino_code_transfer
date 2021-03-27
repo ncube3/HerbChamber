@@ -32,12 +32,16 @@ void printSensor() {
   delay(2000);
 }
 void loop() {
-
-  StaticJsonDocument<256> doc;
-  doc["Humidity (%)"] = dht.readHumidity();
-  doc["Temperature (F)"] = (int)dht.readTemperature(true);
-  doc["Soil Moisture"] = analogRead(soil); 
-  serializeJson(doc, s);
-  delay(5000);
-
+  int soilmoisturepercent = map(analogRead(soil), 550, 280, 0, 100); //500 is dry, 280 is water wet
+  String Char0 = "H: ";
+  String Char1 = "T(F) = ";
+  String Char2 = "Soil = ";
+  String humid = Char0 + (String)dht.readHumidity();
+  String temp = Char1 + (String)dht.readTemperature(true);
+  String moisture = Char2+ (String)soilmoisturepercent;
+  String out = humid + "(%), " + temp + "(F), " + moisture+ "(% wet)";
+  
+  s.print(out);
+  Serial.println(out);
+  delay(15000);
 }
