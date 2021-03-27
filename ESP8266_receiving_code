@@ -35,22 +35,19 @@ void setup() {
   s.begin(115200);
   while (!Serial) continue;
   //testing the connection
-  String data2 = "hello from esp";
-  Firebase.pushString(firebaseData,"/arduino2", data2); 
  }
                               
   
 
 
 void loop() { 
-  String data;
+String data;
+boolean dataReady = false;
+if(s.available()) {
+  data = s.readString();
+  }
+Serial.println(data);
+Firebase.setString(firebaseData,"/arduino", data);
+delay(15000);
+}
 
-  StaticJsonDocument<256> doc;
-  DeserializationError error = deserializeJson(doc, s);
-  if (error) {
-  return;
-  }
-  serializeJsonPretty(doc,data); 
-  Serial.println(data);
-  Firebase.setString(firebaseData,"/arduino", data);
-  }
