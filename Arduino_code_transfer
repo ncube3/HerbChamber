@@ -18,47 +18,22 @@ void setup() {
   s.begin(115200);
 }
 
-
-void printSensor() {
-  float h = dht.readHumidity();
-  float f = dht.readTemperature();
-  float t = dht.readTemperature(true);
-  if (isnan(h) || isnan(t) || isnan(f)) {
-  Serial.println(F("Failed to read from DHT sensor!"));
-  return;
-  }
-
-  Serial.print(F("\nHumidity: (%)"));
-  Serial.print(h);
-  Serial.print(F("\nTemperature (F): "));
-  Serial.print(t);
-
-  delay(2000);
-}
 void loop() {
   int soilmoisturepercent1 = (map(analogRead(soil1), 700, 200, 0, 100))-35; 
   int soilmoisturepercent2 = map(analogRead(soil2), 700, 200, 0, 100)-15; 
   int soilmoisturepercent3 = map(analogRead(soil3), 700, 200, 0, 100)-39; 
   int soilmoisturepercent4 = map(analogRead(soil4), 700, 200, 0, 100)-55; 
-  String Char0 = "H: ";
-  String Char1 = "T(F) = ";
-  String Char2 = "Soil1 = ";
-  String Char3 = "Soil2 = ";
-  String Char4 = "Soil3 = ";
-  String Char5 = "Soil4 = ";
-  String humid = Char0 + (String)dht.readHumidity();
-  String temp = Char1 + (String)dht.readTemperature(true);
-  String moisture1 = Char2+ (String)soilmoisturepercent1;
-  String moisture2 = Char3+ (String)soilmoisturepercent2;
-  String moisture3 = Char4+ (String)soilmoisturepercent3;
-  String moisture4 = Char5+ (String)soilmoisturepercent4;
-  String out = humid + "(%), " + temp + "(F), " + moisture1+ "(% wet)"+ moisture2+ "(% wet)"+ moisture3+ "(% wet)"+ moisture4+ "(% wet)";
+
+  String humid =(String)dht.readHumidity();
+  String temp = (String)dht.readTemperature(true);
+  String moisture1 =(String)soilmoisturepercent1;
+  String moisture2 = (String)soilmoisturepercent2;
+  String moisture3 =(String)soilmoisturepercent3;
+  String moisture4 = (String)soilmoisturepercent4;
+  String out = "| "+humid+" | " +temp+" | "+moisture1+" | "+moisture2+" | "+moisture3+" | "+moisture4+" | ";
   
   s.print(out);
   Serial.println(out);
-  Serial.println(analogRead(soil1));
-  Serial.println(analogRead(soil2));
-  Serial.println(analogRead(soil3));
-  Serial.println(analogRead(soil4));
+
   delay(15000);
 }
