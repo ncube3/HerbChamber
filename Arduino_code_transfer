@@ -6,8 +6,12 @@ DHT dht(DHTPIN, DHTTYPE);
 
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
-SoftwareSerial s(5, 6);
-int soil = A0;
+SoftwareSerial s(2, 3);
+int soil1 = A0;
+int soil2 = A1;
+int soil3 = A3;
+int soil4 = A4;
+
 void setup() {
   dht.begin();
   Serial.begin(9600);
@@ -32,16 +36,29 @@ void printSensor() {
   delay(2000);
 }
 void loop() {
-  int soilmoisturepercent = map(analogRead(soil), 550, 280, 0, 100); //500 is dry, 280 is water wet
+  int soilmoisturepercent1 = (map(analogRead(soil1), 700, 200, 0, 100))-35; 
+  int soilmoisturepercent2 = map(analogRead(soil2), 700, 200, 0, 100)-15; 
+  int soilmoisturepercent3 = map(analogRead(soil3), 700, 200, 0, 100)-39; 
+  int soilmoisturepercent4 = map(analogRead(soil4), 700, 200, 0, 100)-55; 
   String Char0 = "H: ";
   String Char1 = "T(F) = ";
-  String Char2 = "Soil = ";
+  String Char2 = "Soil1 = ";
+  String Char3 = "Soil2 = ";
+  String Char4 = "Soil3 = ";
+  String Char5 = "Soil4 = ";
   String humid = Char0 + (String)dht.readHumidity();
   String temp = Char1 + (String)dht.readTemperature(true);
-  String moisture = Char2+ (String)soilmoisturepercent;
-  String out = humid + "(%), " + temp + "(F), " + moisture+ "(% wet)";
+  String moisture1 = Char2+ (String)soilmoisturepercent1;
+  String moisture2 = Char3+ (String)soilmoisturepercent2;
+  String moisture3 = Char4+ (String)soilmoisturepercent3;
+  String moisture4 = Char5+ (String)soilmoisturepercent4;
+  String out = humid + "(%), " + temp + "(F), " + moisture1+ "(% wet)"+ moisture2+ "(% wet)"+ moisture3+ "(% wet)"+ moisture4+ "(% wet)";
   
   s.print(out);
   Serial.println(out);
+  Serial.println(analogRead(soil1));
+  Serial.println(analogRead(soil2));
+  Serial.println(analogRead(soil3));
+  Serial.println(analogRead(soil4));
   delay(15000);
 }
