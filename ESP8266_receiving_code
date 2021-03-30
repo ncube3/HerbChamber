@@ -7,12 +7,12 @@
 
 #define FIREBASE_HOST "sdp21-4b787.firebaseio.com/" //Without http:// or https:// schemes
 #define FIREBASE_AUTH "Vw8ZlF4gKtPxfs4i0K7EWKMSVJpP6yvZFVWCwR2l"  
-#define WIFI_SSID "nam1plus"
-#define WIFI_PASSWORD "Tinkhung123!"
+#define WIFI_SSID "fried rice"
+#define WIFI_PASSWORD "4133337117"
 
 FirebaseData firebaseData; //Define FirebaseESP8266 data object
 FirebaseJson json;
-
+                                                                                 
 
 SoftwareSerial s(D3,D2);
 void setup() {
@@ -42,13 +42,14 @@ void setup() {
 
 void loop() { 
 String data;
-String data2 = " H(%)   T(F)   S1(%)   S2(%)   S3(%)   S4(%)";
+String data2 = "|  H(%) | T(F)  |  S[1-4]%           |";
 boolean dataReady = false;
 if(s.available()) {
   data = s.readString();
   }
 Serial.println(data);
-Firebase.setString(firebaseData,"/arduino2", data2);
-Firebase.setString(firebaseData,"/arduino", data);
+Firebase.setString(firebaseData,"/arduino2", data);
+Firebase.setString(firebaseData,"/arduino1", data2);
+
 delay(15000);
 }
