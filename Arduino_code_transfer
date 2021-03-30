@@ -19,10 +19,10 @@ void setup() {
 }
 
 void loop() {
-  int soilmoisturepercent1 = (map(analogRead(soil1), 700, 200, 0, 100))-35; 
-  int soilmoisturepercent2 = map(analogRead(soil2), 700, 200, 0, 100)-15; 
-  int soilmoisturepercent3 = map(analogRead(soil3), 700, 200, 0, 100)-39; 
-  int soilmoisturepercent4 = map(analogRead(soil4), 700, 200, 0, 100)-55; 
+  int soilmoisturepercent1 = (map(analogRead(soil1), 700, 250, 0, 100))-20; 
+  int soilmoisturepercent2 = map(analogRead(soil2), 700, 250, 0, 100)-5; 
+  int soilmoisturepercent3 = map(analogRead(soil3), 700, 250, 0, 100)-29; 
+  int soilmoisturepercent4 = map(analogRead(soil4), 700, 250, 0, 100)-52; 
 
   String humid =(String)dht.readHumidity();
   String temp = (String)dht.readTemperature(true);
@@ -30,10 +30,17 @@ void loop() {
   String moisture2 = (String)soilmoisturepercent2;
   String moisture3 =(String)soilmoisturepercent3;
   String moisture4 = (String)soilmoisturepercent4;
-  String out = "| "+humid+" | " +temp+" | "+moisture1+" | "+moisture2+" | "+moisture3+" | "+moisture4+" | ";
-  
+  String out = "| "+humid+" | " +temp+" | "+moisture1+"  "+moisture2+"  "+moisture3+"  "+moisture4+"                   ";
+  Serial.println("---------------------------------");
+  Serial.println(soilmoisturepercent1);
+  Serial.println(soilmoisturepercent2);
+  Serial.println(soilmoisturepercent3);
+  Serial.println(soilmoisturepercent4);
+  Serial.println("---------------------------------");
+  Serial.println(analogRead(soil1));
+  Serial.println(analogRead(soil2));
+  Serial.println(analogRead(soil3));
+  Serial.println(analogRead(soil4));
   s.print(out);
-  Serial.println(out);
-
-  delay(15000);
+  delay(3000);
 }
