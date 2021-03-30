@@ -31,16 +31,7 @@ void loop() {
   String moisture3 =(String)soilmoisturepercent3;
   String moisture4 = (String)soilmoisturepercent4;
   String out = "| "+humid+" | " +temp+" | "+moisture1+"  "+moisture2+"  "+moisture3+"  "+moisture4+"                   ";
-  Serial.println("---------------------------------");
-  Serial.println(soilmoisturepercent1);
-  Serial.println(soilmoisturepercent2);
-  Serial.println(soilmoisturepercent3);
-  Serial.println(soilmoisturepercent4);
-  Serial.println("---------------------------------");
-  Serial.println(analogRead(soil1));
-  Serial.println(analogRead(soil2));
-  Serial.println(analogRead(soil3));
-  Serial.println(analogRead(soil4));
+
   s.print(out);
   delay(3000);
 }
