@@ -7,13 +7,13 @@
 // Relay Control Pins
 
 const int RLY_NUTRIENTS   = -1;
-const int RLY_FANS        = 2;
-const int RLY_VALVE1      = 3;
-const int RLY_VALVE2      = 4;
-const int RLY_VALVE3      = 5;
-const int RLY_VALVE4      = 6;
-const int RLY_PUMP        = 7;
-const int RLY_LIGHT       = 9;
+const int RLY_FANS        = 7;
+const int RLY_VALVE1      = 2;
+const int RLY_VALVE2      = 3;
+const int RLY_VALVE3      = 4;
+const int RLY_VALVE4      = 5;
+const int RLY_PUMP        = 6;
+const int RLY_LIGHT       = 8;
 
 // Analog Sensor Pins
 const int SENSOR_MOISTURE1 = A0;
@@ -32,13 +32,13 @@ SoftwareSerial serialtoESP(9,10);
 const int waterTime = 5;          //should be 28
 const int nutrientTime = 5;
 
-const int moistureThreshold = 25;
+const int moistureThreshold = 30;
 const int tempThreshold = 80;
 
 const int minMoisture = 250;
 const int maxMoisture = 700;
 
-const int inputProcessInterval = 10;
+const int inputProcessInterval = 1;
 
 
 void setup() {
@@ -94,9 +94,9 @@ void statusBlink(int num){
 }
 
 void loop() {
-  //Serial.println("Loop");
-  //processSensorInputs();
-  //delay(inputProcessInterval*100);
+  Serial.println("Loop");
+  processSensorInputs();
+  delay(inputProcessInterval*1000);
   statusBlink(1);
 }
 
@@ -121,10 +121,10 @@ void processSensorInputs(){
   
 
   
-  int m1 = map(ma1, maxMoisture, minMoisture, 0, 100)-20;
-  int m2 = map(ma2, maxMoisture, minMoisture, 0, 100)-5;
-  int m3 = map(ma3, maxMoisture, minMoisture, 0, 100)-29;
-  int m4 = map(ma4, maxMoisture, minMoisture, 0, 100)-52;
+  int m1 = map(ma1, maxMoisture, minMoisture, 0, 100)-18;
+  int m2 = map(ma2, maxMoisture, minMoisture, 0, 100)-40;
+  int m3 = map(ma3, maxMoisture, minMoisture, 0, 100)-42;
+  int m4 = map(ma4, maxMoisture, minMoisture, 0, 100)-14;
 
 
   // Make decisions based on threshold
@@ -187,6 +187,7 @@ void logInputs(){
 void runWaterPump(int bedNumber){
   
   selectValve(bedNumber);
+  delay(1000);
   digitalWrite(RLY_PUMP, HIGH);
   delay(waterTime*1000);
   digitalWrite(RLY_PUMP, LOW);
@@ -293,7 +294,7 @@ void initialTest(){
 
   Serial.println("Lights On");
   digitalWrite(RLY_LIGHT, HIGH);
-  delay(2000);
+  delay(2000);  
   Serial.println("Lights Off");
   digitalWrite(RLY_LIGHT, LOW);
   delay(10000);
