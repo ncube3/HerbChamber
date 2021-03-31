@@ -32,24 +32,17 @@ void setup() {
   Firebase.reconnectWiFi(true);
 
   Serial.begin(9600);
-  s.begin(115200);
+  s.begin(115200); //Establish the baud rate with Arduino
   while (!Serial) continue;
-  //testing the connection
- }
-                              
-  
-
-
+ }                              
 void loop() { 
 String data;
-String data2 = "|  H(%) | T(F)  |  S[1-4]%           |";
-boolean dataReady = false;
+String data2 = "|  H(%) | T(F)  | Soil[1-4]% |";
 if(s.available()) {
   data = s.readString();
   }
 Serial.println(data);
 Firebase.setString(firebaseData,"/arduino2", data);
 Firebase.setString(firebaseData,"/arduino1", data2);
-
 delay(15000);
 }
