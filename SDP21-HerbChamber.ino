@@ -19,7 +19,7 @@ const int SENSOR_MOISTURE2 = A1;
 const int SENSOR_MOISTURE3 = A2;
 const int SENSOR_MOISTURE4 = A3;
 
-const int DHT_PIN = 2;
+const int DHT_PIN = 11;
 
 
 DHT dht(DHT_PIN, DHT11);
