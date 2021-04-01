@@ -77,6 +77,7 @@ void setup() {
   statusBlink(3);
 
   digitalWrite(RLY_LIGHT, HIGH);
+  digitalWrite(RLY_FANS, HIGH);
 
 
 
@@ -301,16 +302,35 @@ void initialTest(){
 
 
 
-//  Serial.println("Test 3");
+}
+  
+  Serial.println("Valve 4 On");
+  digitalWrite(RLY_VALVE4, HIGH);
+  delay(2000);
+  Serial.println("Valve 4 Off");
+  digitalWrite(RLY_VALVE4, LOW);
+  delay(3000);
+  
 
-//  digitalWrite(RLY_PUMP, LOW);
-//  digitalWrite(RLY_VALVE1, LOW);
-//  digitalWrite(RLY_FANS, LOW);
-//  digitalWrite(RLY_LIGHT, LOW);
-//  delay(3000);
-//  digitalWrite(RLY_PUMP, HIGH);
-//  digitalWrite(RLY_VALVE1, HIGH);
-//  digitalWrite(RLY_FANS, HIGH);
-//  digitalWrite(RLY_LIGHT, HIGH);
-//  delay(1000);
+
+  Serial.println();
+  
+  Serial.println("Fans On");
+  digitalWrite(RLY_FANS, HIGH);
+  delay(2000);
+  Serial.println("Fans Off");
+  digitalWrite(RLY_FANS, LOW);
+  delay(3000);
+
+
+  
+  Serial.println();
+
+
+  Serial.println("Lights On");
+  digitalWrite(RLY_LIGHT, HIGH);
+  delay(2000);  
+  Serial.println("Lights Off");
+  digitalWrite(RLY_LIGHT, LOW);
+  delay(10000);
 }
