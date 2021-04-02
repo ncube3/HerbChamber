@@ -27,10 +27,10 @@ SoftwareSerial serialtoESP(9,10);
 
 // Constants
 
-const int waterTime = 5;          //should be 28
+const int waterTime = 2;          //should be 28
 
 
-const int moistureThreshold = 20;
+const int moistureThreshold = 30;
 const int tempThreshold = 80;
 
 const int inputProcessInterval = 1;
@@ -84,7 +84,6 @@ void statusBlink(int num){
 }
 
 void loop() {
-  Serial.println("Loop");
   processSensorInputs();
   delay(inputProcessInterval*1000);
   statusBlink(1);
@@ -100,7 +99,7 @@ void processSensorInputs(){
   int ma4 = 0;
   
   for(int i = 0; i < 10; i++){
-     int a1 = analogRead(SENSOR_MOISTURE1);   //make average of 100 measuremnts
+    int a1 = analogRead(SENSOR_MOISTURE1);   //make average of 100 measuremnts
     int a2 = analogRead(SENSOR_MOISTURE2);
     int a3 = analogRead(SENSOR_MOISTURE3);
     int a4 = analogRead(SENSOR_MOISTURE4);
@@ -131,10 +130,10 @@ void processSensorInputs(){
   
 
   
-  int m1 = map(ma1, 630, 350, 0, 100);
-  int m2 = map(ma2, 610, 355, 0, 100);
-  int m3 = map(ma3, 610, 365, 0, 100);
-  int m4 = map(ma4, 740, 495, 0, 100);
+  int m1 = map(ma1, 670, 360, 0, 100);
+  int m2 = map(ma2, 650, 350, 0, 100);
+  int m3 = map(ma3, 650, 345, 0, 100);
+  int m4 = map(ma4, 780, 460, 0, 100);
 
 
   // Make decisions based on threshold
@@ -178,7 +177,7 @@ void processSensorInputs(){
   String moisture3 =(String)m3;
   String moisture4 = (String)m4;
   String serialOut = "| "+humid1+" | " +temp1+" | "+m1+" "+m2+" "+m3+" "+m4+"                             ";
-  Serial.println(serialOut);
+  Serial.println(serialOut); 
   serialtoESP.print(serialOut);
 
 
@@ -217,20 +216,34 @@ void selectValve(int valveNum){
 void allRelaysTest(){
 
   
-  digitalWrite(2, LOW);
+  digitalWrite(2, HIGH);
   digitalWrite(3, LOW);
   digitalWrite(4, LOW);
   digitalWrite(5, LOW);
   digitalWrite(6, LOW);
   digitalWrite(7, LOW);
   digitalWrite(8, LOW);
-  
-  digitalWrite(LED_BUILTIN, HIGH);
-  digitalWrite(2, HIGH);
+
+
+  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(8, LOW);
   delay(2000);
 
   digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(8, HIGH);
+  delay(2000);
+  
+  
+  digitalWrite(LED_BUILTIN, HIGH);
   digitalWrite(2, LOW);
+  delay(2000);
+
+  digitalWrite(6, HIGH);
+  delay(5000);
+  digitalWrite(6, LOW);
+
+  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(2, HIGH);
   delay(2000);
 
   
@@ -238,16 +251,27 @@ void allRelaysTest(){
   digitalWrite(3, HIGH);
   delay(2000);
 
+  
+  digitalWrite(6, HIGH);
+  delay(5000);
+  digitalWrite(6, LOW);
+  
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(3, LOW);
   delay(2000);
 
-  
+    
 
   digitalWrite(LED_BUILTIN, HIGH);
   digitalWrite(4, HIGH);
   delay(2000);
 
+  
+  digitalWrite(6, HIGH);
+  delay(5000);
+  digitalWrite(6, LOW);
+
+  
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(4, LOW);
   delay(2000);
@@ -257,17 +281,14 @@ void allRelaysTest(){
   digitalWrite(5, HIGH);
   delay(2000);
 
+  
+  digitalWrite(6, HIGH);
+  delay(5000);
+  digitalWrite(6, LOW);
+
+  
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(5, LOW);
-  delay(2000);
-
-
-  digitalWrite(LED_BUILTIN, HIGH);
-  digitalWrite(6, HIGH);
-  delay(2000);
-
-  digitalWrite(LED_BUILTIN, LOW);
-  digitalWrite(6, LOW);
   delay(2000);
 
 
@@ -280,13 +301,6 @@ void allRelaysTest(){
   delay(2000);
 
 
-  digitalWrite(LED_BUILTIN, HIGH);
-  digitalWrite(8, HIGH);
-  delay(2000);
-
-  digitalWrite(LED_BUILTIN, LOW);
-  digitalWrite(8, LOW);
-  delay(2000);
 
   statusBlink(3);
 
