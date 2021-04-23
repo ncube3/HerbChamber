@@ -1,0 +1,159 @@
+//#include "eagle_soc.h"
+//#include "mem.h"
+//#include "ets_sys.h"
+//#include "os_type.h"
+
+#include <time.h>
+#include "ets_sys.h"
+#include "osapi.h"
+#include "gpio.h"
+#include "os_type.h"
+#include "user_config.h"
+#include "user_interface.h"
+#include "cont.h"
+
+
+#define ON 1
+#define OFF 0
+
+#define LED_PIN 2
+
+static const uint8_t D0   = 16;
+static const uint8_t D1   = 5;
+static const uint8_t D2   = 4;
+static const uint8_t D3   = 0;
+static const uint8_t D4   = 2;
+static const uint8_t D5   = 14;
+static const uint8_t D6   = 12;
+static const uint8_t D7   = 13;
+static const uint8_t D8   = 15;
+static const uint8_t D9   = 3;
+static const uint8_t D10  = 1;
+
+//Use brackets on numbers
+
+
+static os_timer_t main_timer;
+static os_timer_t delay_timer;
+
+static void main_timer_handler(void *prv);
+static void delay_timer_handler(void *prv);
+
+void setup() {
+  
+  //PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDI_U, FUNC_GPIO12);
+
+  // gpio_output_set: set_mask, clear_mask, enable_mask, disable_mask
+  // gpio_output_set(BIT12, 0, BIT12,  0);  //set gpio pin 12 to high
+
+
+  // GPIO_OUPTUT_SET: gpio_no, bit_value
+  // GPIO_OUTPUT_SET(12, 1);  //set gpio pin 12 to high
+    
+
+  Serial.begin(9600);
+
+  
+  ESP.wdtDisable();  
+
+    
+  gpio_init(); // init gpio subsytem
+
+  PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
+  
+  gpio_output_set(0, 0, (1 << LED_PIN), 0); // set LED pin as output with low state
+
+
+  os_timer_setfn(&main_timer, (os_timer_func_t *)main_timer_handler, NULL);
+  os_timer_arm(&main_timer, 500, 0);
+  
+  
+}
+
+
+void main_timer_handler(void *prv)
+{
+    if (GPIO_REG_READ(GPIO_OUT_ADDRESS) & (1 << LED_PIN)) {
+       digitalWrite(LED_PIN, LOW);
+    } else {
+       digitalWrite(LED_PIN, HIGH);
+    }
+
+//    int sensor = analogRead2();
+//    Serial.println(sensor);
+
+
+    Serial.println("Hello 1");
+    
+    delay2(3000000);
+
+    Serial.println("Hello 2");
+
+
+    os_timer_disarm(&main_timer);
+    os_timer_arm(&main_timer, 1000, 0);
+    
+}
+
+void digitalWrite2(uint8_t pin, uint8_t val){
+  if(val) gpio_output_set((1 << pin), 0, 0, 0);
+  else gpio_output_set(0, (1 << pin), 0, 0);
+}
+
+uint8_t digitalRead2(uint8_t pin) {
+  if (16==pin) {
+    return (READ_PERI_REG(RTC_GPIO_IN_DATA) & 1UL);
+  } else {
+    return GPIO_INPUT_GET(GPIO_ID_PIN(gpio_pin));
+  }
+}
+
+int analogRead2(){
+  return system_adc_read();
+}
+
+void delay2(int ms){
+  int endTime = system_get_time() + ms;   
+  Serial.println(system_get_time());
+  Serial.println(endTime);
+  
+  while (system_get_time() < endTime){
+    ESP.wdtFeed();    
+  }
+}
+
+
+
+
+
+int map2(int x, int min1, int max1, int min2, int max2)
+{
+  return (x - min1)*(max2 - min2)/(max1 - min1) + min2;
+}
+
+
+
+
+void loop(){}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
