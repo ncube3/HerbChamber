@@ -276,19 +276,23 @@ void runWaterPump(int bedNumber){
 }
 
 
+
 void selectValve(int valveNum){
   
   int selectedValve = RLY_VALVE1 + (valveNum-1);
 
   
-  digitalWrite2(RLY_VALVE1, LOW);
+  digitalWrite2(RLY_VALVE1, HIGH);
   digitalWrite2(RLY_VALVE2, LOW);
   digitalWrite2(RLY_VALVE3, LOW);
   digitalWrite2(RLY_VALVE4, LOW);
-  
-  digitalWrite2(selectedValve, HIGH);
 
+  if(selectedValve == RLY_VALVE1)
+    digitalWrite2(selectedValve, LOW);
+  else
+    digitalWrite2(selectedValve, HIGH);
 }
+
 
 
 void initialTest(){
@@ -298,7 +302,7 @@ void initialTest(){
   digitalWrite2(RLY_FANS, LOW);
   digitalWrite2(RLY_NUTRIENTS, LOW);
   digitalWrite2(RLY_LIGHT, LOW);
-  digitalWrite2(RLY_VALVE1, LOW);
+  digitalWrite2(RLY_VALVE1, HIGH);
   digitalWrite2(RLY_VALVE2, LOW);
   digitalWrite2(RLY_VALVE3, LOW);
   digitalWrite2(RLY_VALVE4, LOW);
@@ -318,10 +322,10 @@ void initialTest(){
   Serial.println();
   
   Serial.println("Valve 1 On");
-  digitalWrite2(RLY_VALVE1, HIGH);
+  digitalWrite2(RLY_VALVE1, LOW);
   delay2(2000);
   Serial.println("Valve 1 Off");
-  digitalWrite2(RLY_VALVE1, LOW);
+  digitalWrite2(RLY_VALVE1, HIGH);
   delay(3000);
 
 
