@@ -91,20 +91,20 @@ void setup() {
   ESP.wdtDisable(); 
 
   // ESP connect to WIFI
-//  
-//  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-//  Serial.print("Connecting to Wi-Fi");
-//  while (WiFi.status() != WL_CONNECTED)
-//  {
-//    Serial.print(".");
-//    delay(300);
-//  }
-//  Serial.println();
-//  Serial.print("Connected with IP: ");
-//  Serial.println(WiFi.localIP());
-//  Serial.println();
-//  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
-//  Firebase.reconnectWiFi(true);
+  
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to Wi-Fi");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(300);
+  }
+  Serial.println();
+  Serial.print("Connected with IP: ");
+  Serial.println(WiFi.localIP());
+  Serial.println();
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+  Firebase.reconnectWiFi(true);
 
 
   // GPIO initialization
@@ -142,7 +142,7 @@ void setup() {
   Serial.begin(9600);
   
   Serial.println("Starting up");
-  statusBlink(3);
+  statusBlink(15);
 
   digitalWrite2(RLY_LIGHT, HIGH);
 
@@ -150,8 +150,8 @@ void setup() {
   initialTest();
 
   // Loop timer
-  //os_timer_setfn(&main_timer, (os_timer_func_t *)main_timer_handler, NULL);
-  //os_timer_arm(&main_timer, inputProcessInterval*1000, 0);
+  os_timer_setfn(&main_timer, (os_timer_func_t *)main_timer_handler, NULL);
+  os_timer_arm(&main_timer, inputProcessInterval*1000, 0);
 
 }
 
@@ -495,47 +495,3 @@ int map2(int x, int min1, int max1, int min2, int max2)
 //  gpio_output_set(0, 0, (1 << RLY_VALVE3), 0);
 //  gpio_output_set(0, 0, (1 << RLY_VALVE4), 0);
 //  gpio_output_set(0, 0, (1 << LED_BUILTIN), 0);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
