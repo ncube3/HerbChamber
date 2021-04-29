@@ -1,0 +1,298 @@
+#include <DHT.h>
+#include "FirebaseESP8266.h"  // Install Firebase ESP8266 library
+#include <ESP8266WiFi.h>
+#include <SPI.h>
+#include <Wire.h>
+
+#define FIREBASE_HOST "sdp21-4b787.firebaseio.com/" //Without http:// or https:// schemes
+#define FIREBASE_AUTH "Vw8ZlF4gKtPxfs4i0K7EWKMSVJpP6yvZFVWCwR2l"  
+#define WIFI_SSID "fried rice"
+#define WIFI_PASSWORD "4133337117"
+
+FirebaseData firebaseData; //Define FirebaseESP8266 data object
+FirebaseJson json;
+
+static const uint8_t D0   = 16;
+static const uint8_t D1   = 5;
+static const uint8_t D2   = 4;
+static const uint8_t D3   = 0;
+static const uint8_t D4   = 2;
+static const uint8_t D5   = 14;
+static const uint8_t D6   = 12;
+static const uint8_t D7   = 13;
+static const uint8_t D8   = 15;
+static const uint8_t D9   = 3;
+
+
+// Relay Control Pins
+const int RLY_VALVE1      = D2;
+const int RLY_VALVE2      = D3;
+const int RLY_VALVE3      = D4;
+const int RLY_VALVE4      = D5;
+const int RLY_PUMP        = D6;
+const int RLY_FANS        = D7;
+const int RLY_LIGHT       = D8;
+
+// Analog Sensor Pins
+const int SENSOR_MOISTURE1 = A0;
+const int SENSOR_MOISTURE2 = A0;
+const int SENSOR_MOISTURE3 = A0;
+const int SENSOR_MOISTURE4 = A0;
+
+const int DHT_PIN = 10; //SD3
+
+
+DHT dht(DHT_PIN, DHT11);
+
+// Constants
+
+const int waterTime = 2;          //should be 28
+const int moistureThreshold = 30;
+const int tempThreshold = 80;
+const int inputProcessInterval = 1;
+
+
+void setup() {
+  //WIFI set up
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to Wi-Fi");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(300);
+  }
+  Serial.println();
+  Serial.print("Connected with IP: ");
+  Serial.println(WiFi.localIP());
+  Serial.println();
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+  Firebase.reconnectWiFi(true);
+
+  Serial.begin(9600);
+
+  //Assign pins
+  pinMode(RLY_PUMP, OUTPUT);
+  pinMode(RLY_FANS, OUTPUT);
+  pinMode(RLY_LIGHT, OUTPUT);
+  pinMode(RLY_VALVE1, OUTPUT);
+  pinMode(RLY_VALVE2, OUTPUT);
+  pinMode(RLY_VALVE3, OUTPUT);
+  pinMode(RLY_VALVE4, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  pinMode(SENSOR_MOISTURE1, INPUT);
+  pinMode(SENSOR_MOISTURE2, INPUT);
+  pinMode(SENSOR_MOISTURE3, INPUT);
+  pinMode(SENSOR_MOISTURE4, INPUT);
+  
+  digitalWrite(RLY_PUMP, LOW);
+  digitalWrite(RLY_FANS, LOW);
+  digitalWrite(RLY_LIGHT, LOW);
+  digitalWrite(RLY_VALVE1, HIGH);
+  digitalWrite(RLY_VALVE2, LOW);
+  digitalWrite(RLY_VALVE3, LOW);
+  digitalWrite(RLY_VALVE4, LOW);
+
+
+  
+  dht.begin();                  //DHT Sensor
+  Serial.println("Starting up");
+  statusBlink(3);
+  //allRelaysTest();
+}
+
+void statusBlink(int num){
+  for(int i = 0; i < num; i++){
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(1000);
+    digitalWrite(LED_BUILTIN, LOW);  
+    delay(1000);
+  }
+}
+
+void loop() {
+  processSensorInputs();
+  delay(inputProcessInterval*1000);
+  statusBlink(1);
+}
+
+
+
+void processSensorInputs(){
+
+  int ma1 = 0;
+  int ma2 = 0;
+  int ma3= 0;
+  int ma4 = 0;
+  
+  for(int i = 0; i < 10; i++){
+    int a1 = analogRead(SENSOR_MOISTURE1);   //make average of 100 measuremnts
+    int a2 = analogRead(SENSOR_MOISTURE2);
+    int a3 = analogRead(SENSOR_MOISTURE3);
+    int a4 = analogRead(SENSOR_MOISTURE4);
+
+    ma1+=a1;
+    ma2+=a2;
+    ma3+=a3;
+    ma4+=a4;
+
+    
+    delay(10);
+ }
+
+ ma1/=10;
+ ma2/=10;
+ ma3/=10;
+ ma4/=10;
+  
+  
+  double temp = dht.readTemperature(true);
+  double humid = dht.readHumidity();
+
+  if (isnan(temp) || isnan(humid)) {
+     Serial.println("Failed to read from DHT sensor");
+     temp = -1;
+     humid = -1;
+  }
+  
+
+  
+  int m1 = map(ma1, 670, 360, 0, 100);
+  int m2 = map(ma2, 650, 350, 0, 100);
+  int m3 = map(ma3, 650, 345, 0, 100);
+  int m4 = map(ma4, 780, 460, 0, 100);
+
+
+  // Make decisions based on threshold
+
+  if(m1 < moistureThreshold){
+    Serial.println("Running water pump 1");
+    delay(1000);
+    runWaterPump(1);
+  }
+
+  if(m2 < moistureThreshold){
+    Serial.println("Running water pump 2");
+    delay(1000);
+    runWaterPump(2);
+  }
+
+  if(m3 < moistureThreshold){
+    Serial.println("Running water pump 3");
+    delay(1000);
+    runWaterPump(3);
+  }
+
+  if(m4 < moistureThreshold){
+    Serial.println("Running water pump 4");
+    delay(1000);
+    runWaterPump(4);
+  }
+
+  if(temp < tempThreshold){
+    digitalWrite(RLY_FANS, HIGH);
+  }
+  else{
+    digitalWrite(RLY_FANS, LOW);
+  }
+
+  //Sending data to cloud
+Firebase.setString(firebaseData,"/SDP_DATA/Humidity(%)", (String)humid);
+Firebase.setString(firebaseData,"/SDP_DATA/Temperature(F)", (String)temp);
+Firebase.setString(firebaseData,"/SDP_DATA/Soil_1(%)", (String)m1);
+Firebase.setString(firebaseData,"/SDP_DATA/Soil_2(%)", (String)m2);
+Firebase.setString(firebaseData,"/SDP_DATA/Soil_3(%)", (String)m3);
+Firebase.setString(firebaseData,"/SDP_DATA/Soil_4(%)", (String)m4);
+
+
+
+}
+
+
+void runWaterPump(int bedNumber){ 
+  selectValve(bedNumber);
+  delay(1000);
+  digitalWrite(RLY_PUMP, HIGH);
+  delay(waterTime*1000);
+  digitalWrite(RLY_PUMP, LOW);
+  selectValve(-1); 
+}
+
+
+void selectValve(int valveNum){
+  
+  int selectedValve = RLY_VALVE1 + (valveNum-1);
+
+  
+  digitalWrite(RLY_VALVE1, HIGH);
+  digitalWrite(RLY_VALVE2, LOW);
+  digitalWrite(RLY_VALVE3, LOW);
+  digitalWrite(RLY_VALVE4, LOW);
+
+  if(selectedValve == RLY_VALVE1)
+    digitalWrite(selectedValve, LOW);
+  else
+    digitalWrite(selectedValve, HIGH);
+}
+
+
+
+
+void allRelaysTest(){
+
+  
+  digitalWrite(D2, HIGH);
+  digitalWrite(D3, LOW);
+  digitalWrite(D4, LOW);
+  digitalWrite(D5, LOW);
+  digitalWrite(D6, LOW);
+  digitalWrite(D7, LOW);
+  digitalWrite(D8, LOW);
+
+  Serial.println("Light test");
+  digitalWrite(RLY_LIGHT, LOW);
+  delay(2000);
+  digitalWrite(RLY_LIGHT, HIGH);
+  delay(2000);
+  
+  Serial.println("Fans test");
+  digitalWrite(RLY_FANS, LOW);
+  delay(2000);
+  digitalWrite(RLY_FANS, HIGH);
+  delay(2000);
+
+  Serial.println("Pump test");
+  digitalWrite(RLY_PUMP, LOW);
+  delay(2000);
+  digitalWrite(RLY_PUMP, HIGH);
+  delay(2000);
+  
+  Serial.println("solenoid 1 test");
+  digitalWrite(RLY_VALVE1, LOW);
+  delay(2000);
+  digitalWrite(RLY_VALVE1, HIGH);
+  delay(2000);
+
+  Serial.println("solenoid 2 test");
+  digitalWrite(RLY_VALVE2, LOW);
+  delay(2000);
+  digitalWrite(RLY_VALVE2, HIGH);
+  delay(2000);
+  
+  Serial.println("solenoid 3 test");
+  digitalWrite(RLY_VALVE3, LOW);
+  delay(2000);
+  digitalWrite(RLY_VALVE3, HIGH);
+  delay(2000);
+  
+  Serial.println("solenoid 4 test");
+  digitalWrite(RLY_VALVE4, LOW);
+  delay(2000);
+  digitalWrite(RLY_VALVE4, HIGH);
+  delay(2000);
+
+
+
+  statusBlink(3);
+
+}
